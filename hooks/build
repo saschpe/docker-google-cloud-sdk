@@ -1,0 +1,7 @@
+#!/bin/bash
+
+for google_cloud_sdk in ${GOOGLE_CLOUD_SDK[*]} ; do
+    ./scripts/docker/build \
+        --google-cloud-sdk ${google_cloud_sdk} \
+        --docker-push
+done

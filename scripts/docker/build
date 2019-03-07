@@ -1,0 +1,68 @@
+#!/bin/bash
+#
+# Script to build transpiler Docker image.
+#
+# Needs root privileges or 'docker' group membership
+
+SCRIPT_DIR=$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )
+. "${SCRIPT_DIR}/../inc.constants"
+. "${SCRIPT_DIR}/../inc.functions"
+
+
+# Default values
+DEFAULT_GOOGLE_CLOUD_SDK=$(grep google_cloud_sdk= "${SCRIPT_DIR}/../../Dockerfile" | cut -d"=" -f2)
+
+
+# Functions
+function usage {
+    echo -e "Usage: ${0} [OPTIONS]"
+    echo -e "Options:"
+    echo -e "  --google-cloud-sdk VERSION\t(default: ${DEFAULT_GOOGLE_CLOUD_SDK})"
+    echo -e "  --docker-push\t\t\t(optional)"
+    exit 1
+}
+
+
+# Command-line arguments
+google_cloud_sdk=${DEFAULT_GOOGLE_CLOUD_SDK}
+docker_push=
+while [[ $# -gt 0 ]] ; do
+    key="$1"
+    case $key in
+    --google-cloud-sdk)
+        google_cloud_sdk="$2"
+        shift # past argument
+        ;;
+    --docker-push)
+        docker_push=true
+        ;;
+    -h|--help)
+        usage
+        shift # past argument
+        ;;
+    *) # unknown option
+        ;;
+    esac
+    shift # past argument or value
+done
+
+
+# Let's roll
+image_tag=${google_cloud_sdk}
+
+echo "Building image tag ${image_tag}..."
+safe docker build \
+    --build-arg google_cloud_sdk=${google_cloud_sdk} \
+    --tag ${DOCKER_IMAGE}:${image_tag} .
+if [ ${docker_push} ] ; then
+    safe docker push ${DOCKER_IMAGE}:${image_tag}
+fi
+
+# Update 'latest' tag if script argument match defaults
+if [ "${google_cloud_sdk}" = "${DEFAULT_GOOGLE_CLOUD_SDK}" ]; then
+    echo "Tagging as 'latest'..."
+    safe docker tag ${DOCKER_IMAGE}:${image_tag} ${DOCKER_IMAGE}:latest
+    if [ ${docker_push} ] ; then
+        safe docker push ${DOCKER_IMAGE}:latest
+    fi
+fi
