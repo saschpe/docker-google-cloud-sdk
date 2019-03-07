@@ -19,3 +19,5 @@ RUN wget \
     && rm -v /tmp/sdk.tar.gz \
     && ${SDK_ROOT}/install.sh --quiet
 RUN gcloud config set disable_usage_reporting true
+
+ENTRYPOINT ["gcloud"]

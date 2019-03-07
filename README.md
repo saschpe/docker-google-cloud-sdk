@@ -8,11 +8,9 @@ Google Cloud SKD Docker container based on Alpine Linux.
 
 
 ## Usage
-Use like you would any other base image:
+Invoke the container just like *gcloud* ifself:
 
-    FROM saschpe/google-cloud-sdk
-    RUN apk add --no-cache mysql-client
-    ENTRYPOINT ["mysql"]
+    docker run --rm saschpe/google-cloud-sdk version
 
 
 ## Scripts
